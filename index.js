@@ -8,9 +8,9 @@ app.use(cors())
 app.use(express.json())
 
 // MongoDB
-// model-db   mKsvySoRkFPAfOzT
+// crop-db   yi8mul1AZNsyrNME
 const uri =
-  "mongodb+srv://model-db:mKsvySoRkFPAfOzT@cluster0.fkciokq.mongodb.net/?appName=Cluster0";
+  "mongodb+srv://crop-db:yi8mul1AZNsyrNME@cluster0.fkciokq.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -25,10 +25,16 @@ async function run() {
   try {
     await client.connect();
     // API MongoDB  Data anbo and pathabo
+    const db = client.db("crop-db");
+    const cropsCollection = db.collection('crops')
+
+
+
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
+      "Pingeds your deployment. You successfully connected to MongoDB!"
     );
   } finally {
     // Ensures that the client will close when you finish/error
