@@ -46,7 +46,6 @@ async function run() {
       res.send(crop);
     });
 
-
     // POST
     // submit interest
     app.post("/crops/:id/interests", async (req, res) => {
@@ -79,6 +78,23 @@ async function run() {
       const result = await cropsCollection.insertOne(newCrop);
       res.send(result);
     });
+
+    //4 submit interest
+    app.post("/crops/:id/interests", async (req, res) => {
+      const { id } = req.params;
+      const interest = req.body;
+      const interestId = new ObjectId();
+      const newInterest = { _id: interestId, ...interest };
+
+      await cropsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $push: { interests: newInterest } }
+      );
+
+      res.send({ success: true, interestId: interestId.toString() });
+    });
+
+
 
     // POST End
 
