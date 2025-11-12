@@ -65,10 +65,10 @@ async function run() {
       res.send(result);
     });
 
-    // update iInterest 
+    // update iInterest
     app.patch("/crops/:cropId/interests/:interestId", async (req, res) => {
       const { cropId, interestId } = req.params;
-      const { status } = req.body; // accepted / rejected
+      const { status } = req.body;
 
       const result = await cropsCollection.updateOne(
         {
@@ -85,10 +85,23 @@ async function run() {
       );
     });
 
-    // Add
+    // Add new cro
+
+    app.post("/crops", async (req, res) => {
+      const newCrop = req.body;
+      newCrop.interests = [];
+      const result = await cropsCollection.insertOne(newCrop);
+      res.send(result);
+    });
 
     // delete crop
+    app.delete("/crops/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await cropsCollection.deleteOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
 
+    //
     console.log("MongoDB connected");
   } finally {
     // client.close(); 
