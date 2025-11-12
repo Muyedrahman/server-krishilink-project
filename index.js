@@ -40,7 +40,7 @@ async function run() {
       const { id } = req.params;
       const interest = req.body;
 
-      // mongodb unique _id 
+      // mongodb unique _id
       const interestId = new ObjectId();
       const newInterest = { _id: interestId, ...interest };
 
@@ -55,9 +55,19 @@ async function run() {
           result.modifiedCount > 0
             ? "Interest submitted successfully"
             : "Failed to submit interest",
-        interestId: interestId.toString(), 
+        interestId: interestId.toString(),
       });
     });
+
+    // POST  Add Crop
+    app.post("/crops", async (req, res) => {
+      const newCrop = req.body;
+      newCrop.interests = [];
+      const result = await cropsCollection.insertOne(newCrop);
+      res.send(result);
+    });
+
+    // POST End
 
     // update crop
     app.put("/crops/:id", async (req, res) => {
