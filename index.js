@@ -54,7 +54,21 @@ async function run() {
       );
     });
 
-    
+    // update crop
+    app.put("/crops/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      const result = await cropsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedData }
+      );
+      res.send(result);
+    });
+    // Update
+
+    // Add
+
+    // delete crop
 
     console.log("MongoDB connected");
   } finally {
@@ -65,7 +79,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Server is running");
+  res.send("Server is running fine!");
 });
 
 app.listen(port, () => {
