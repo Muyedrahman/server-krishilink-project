@@ -39,6 +39,12 @@ async function run() {
       const crops = await cropsCollection.find().toArray();
       res.send(crops);
     });
+    // get single c
+    app.get("/crops/:id", async (req, res) => {
+      const { id } = req.params;
+      const crop = await cropsCollection.findOne({ _id: new ObjectId(id) });
+      res.send(crop);
+    });
 
 
     // POST
