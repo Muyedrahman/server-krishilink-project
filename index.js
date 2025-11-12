@@ -34,7 +34,14 @@ async function run() {
       const crop = await cropsCollection.findOne({ _id: new ObjectId(id) });
       res.send(crop);
     });
-    // submit
+    //get-crops
+    app.get("/crops", async (req, res) => {
+      const crops = await cropsCollection.find().toArray();
+      res.send(crops);
+    });
+
+
+    // POST
     // submit interest
     app.post("/crops/:id/interests", async (req, res) => {
       const { id } = req.params;
