@@ -30,11 +30,28 @@ async function run() {
       res.send(crops);
     });
 
-    //  Read single crop by ID
     app.get("/crops/:id", async (req, res) => {
       const { id } = req.params;
       const crop = await cropsCollection.findOne({ _id: new ObjectId(id) });
       res.send(crop);
+    });
+    // submit
+    app.post("/crops/:id/interests", async (req, res) => {
+      const { id } = req.params;
+      const interest = req.body;
+      const interestId = new ObjectId();
+      const newInterest = { _id: interestId, ...interest };
+
+      const result = await cropsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $push: { interests: newInterest } }
+      );
+
+      res.send(
+        result.modifiedCount > 0
+          ? { success: true, message: "Interest submitted successfully" }
+          : { success: false, message: "Failed to submit interest" }
+      );
     });
 
     
@@ -48,7 +65,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Server is running 🌱");
+  res.send("Server is running");
 });
 
 app.listen(port, () => {
