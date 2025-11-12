@@ -64,7 +64,26 @@ async function run() {
       );
       res.send(result);
     });
-    // Update
+
+    // update iInterest 
+    app.patch("/crops/:cropId/interests/:interestId", async (req, res) => {
+      const { cropId, interestId } = req.params;
+      const { status } = req.body; // accepted / rejected
+
+      const result = await cropsCollection.updateOne(
+        {
+          _id: new ObjectId(cropId),
+          "interests._id": new ObjectId(interestId),
+        },
+        { $set: { "interests.$.status": status } }
+      );
+
+      res.send(
+        result.modifiedCount > 0
+          ? { success: true, message: "Interest status updated" }
+          : { success: false, message: "Failed to update status" }
+      );
+    });
 
     // Add
 
