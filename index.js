@@ -1,9 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ObjectId} = require("mongodb");
-
-
-
+const { MongoClient, ObjectId } = require("mongodb");
 
 const app = express();
 const port = 3000;
@@ -11,48 +8,64 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-// mongoDB connection
-const uri = "mongodb+srv://crop-db:yi8mul1AZNsyrNME@cluster0.fkciokq.mongodb.net/?appName=Cluster0";
-
+// MongoDB
+// crop-db   yi8mul1AZNsyrNME
+const uri =
+  "mongodb+srv://crop-db:yi8mul1AZNsyrNME@cluster0.fkciokq.mongodb.net/?appName=Cluster0";
 const client = new MongoClient(uri);
-
 
 async function run() {
   try {
     await client.connect();
     const db = client.db("crop-db");
     const cropsCollection = db.collection("crops");
+    const usersCollection = db.collection("users");
 
-    //  read all crops
+    // ---------------- CROPS ----------------
+
+    // Get
     app.get("/crops", async (req, res) => {
       const crops = await cropsCollection.find().toArray();
       res.send(crops);
     });
 
-    app.get("/crops/:id", async (req, res) => {
-      const { id } = req.params;
-      const crop = await cropsCollection.findOne({ _id: new ObjectId(id) });
-      res.send(crop);
-    });
-    //get-crops
-    app.get("/crops", async (req, res) => {
-      const crops = await cropsCollection.find().toArray();
-      res.send(crops);
-    });
-    // get single c
+    // single crop
     app.get("/crops/:id", async (req, res) => {
       const { id } = req.params;
       const crop = await cropsCollection.findOne({ _id: new ObjectId(id) });
       res.send(crop);
     });
 
-    // POST
-    // submit interest
+    // Add
+    app.post("/crops", async (req, res) => {
+      const newCrop = req.body;
+      newCrop.interests = [];
+      const result = await cropsCollection.insertOne(newCrop);
+      res.send(result);
+    });
+
+    // update
+    app.put("/crops/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedData = req.body;
+      const result = await cropsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedData }
+      );
+      res.send(result);
+    });
+
+    // delete
+    app.delete("/crops/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await cropsCollection.deleteOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+
+    // 1 add interss
     app.post("/crops/:id/interests", async (req, res) => {
       const { id } = req.params;
       const interest = req.body;
-
-      // mongodb unique _id
       const interestId = new ObjectId();
       const newInterest = { _id: interestId, ...interest };
 
@@ -71,45 +84,7 @@ async function run() {
       });
     });
 
-    // POST  Add Crop
-    app.post("/crops", async (req, res) => {
-      const newCrop = req.body;
-      newCrop.interests = [];
-      const result = await cropsCollection.insertOne(newCrop);
-      res.send(result);
-    });
-
-    //4 submit interest
-    app.post("/crops/:id/interests", async (req, res) => {
-      const { id } = req.params;
-      const interest = req.body;
-      const interestId = new ObjectId();
-      const newInterest = { _id: interestId, ...interest };
-
-      await cropsCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $push: { interests: newInterest } }
-      );
-
-      res.send({ success: true, interestId: interestId.toString() });
-    });
-
-
-
-    // POST End
-
-    // update crop
-    app.put("/crops/:id", async (req, res) => {
-      const { id } = req.params;
-      const updatedData = req.body;
-      const result = await cropsCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedData }
-      );
-      res.send(result);
-    });
-
-    // update iInterest
+    //2 update
     app.patch("/crops/:cropId/interests/:interestId", async (req, res) => {
       const { cropId, interestId } = req.params;
       const { status } = req.body;
@@ -129,37 +104,56 @@ async function run() {
       );
     });
 
-    // Add new cro
+    // ----------------Profile ----------------
 
-    app.post("/crops", async (req, res) => {
-      const newCrop = req.body;
-      newCrop.interests = [];
-      const result = await cropsCollection.insertOne(newCrop);
-      res.send(result);
+    // get user info
+    app.get("/users/:email", async (req, res) => {
+      const { email } = req.params;
+      const user = await usersCollection.findOne({ email });
+      res.send(user || {});
     });
 
-    // delete crop
-    app.delete("/crops/:id", async (req, res) => {
-      const { id } = req.params;
-      const result = await cropsCollection.deleteOne({ _id: new ObjectId(id) });
-      res.send(result);
+    app.put("/users/:email", async (req, res) => {
+      const { email } = req.params;
+      const updatedInfo = req.body;
+      try {
+        const result = await usersCollection.updateOne(
+          { email },
+          { $set: updatedInfo },
+          { upsert: true }
+        );
+        res.send({
+          success: true,
+          message: "Profile updated successfully",
+          result,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ success: false, message: "Server error" });
+      }
     });
 
-    //
-    console.log("MongoDB connected");
+    // await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
-    // client.close(); 
+    // client.close();
   }
 }
 
 run().catch(console.dir);
-// 5
+
+
+
+
+// endddd
 app.get("/", (req, res) => {
   res.send("Server is running fine!");
 });
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Server is listening on port ${port}`);
 });
 
 
